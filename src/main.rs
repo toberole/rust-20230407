@@ -1,40 +1,17 @@
-use std::io::{Error, Read, Write};
-use std::net::{TcpListener, TcpStream};
-use std::thread;
-use std::time;
+use crate::{garden::vegetables::Asparagus, test::demo1};
 
-fn handle_client(mut stream: TcpStream) -> Result<(), Error> {
-    let mut buf = [0; 512];
-    for _ in 0..1000 {
-        let bytes_read = stream.read(&mut buf)?;
-        if bytes_read == 0 {
-            return Ok(());
-        }
+// 告诉编译器应该包含在src/garden.rs文件中发现的代码
+pub mod garden;
+pub mod test;
 
-        stream.write(&buf[..bytes_read])?;
-        thread::sleep(time::Duration::from_secs(1 as u64));
-    }
+fn main() {
+    let plant = Asparagus {};
+    println!("I'm growing {:?}!", plant);
+    // let s1 = match demo1::demo("a") {
+    //     Some(s) => {s},
+    //     None => {"no ......"}
+    // };
+    // println!("demo1::demo {}",s1);
 
-    Ok(())
-}
-
-fn main() -> Result<(), Error> {
-    println!("Hello TCP!");
-
-    let listener = TcpListener::bind("127.0.0.1:8080")?;
-    let mut thread_vec: Vec<thread::JoinHandle<()>> = Vec::new();
-
-    for stream in listener.incoming() {
-        let stream = stream.expect("failed!");
-        let handle = thread::spawn(move || {
-            handle_client(stream).unwrap_or_else(|error| eprintln!("{:?}", error));
-        });
-
-        thread_vec.push(handle);
-    }
-
-    for handle in thread_vec {
-        handle.join().unwrap();
-    }
-    Result::Ok(())
+    demo1::demo3();
 }
