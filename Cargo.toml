@@ -1,11 +1,15 @@
 [package]
+edition = "2021"
 name = "rust-20230407"
 version = "0.1.0"
-edition = "2021"
+
+# 该配置 使得app在发生panic时,不进行栈展开 而是直接abort
+# [profile.release]
+# panic = 'abort'
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 rand = "0.8.5"
-tokio = { version = "1.26.0", features = ["full"]}
+tokio = {version = "1.26.0", features = ["full"]}
 tokio-stream = "0.1.12"
