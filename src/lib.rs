@@ -1,4 +1,6 @@
 pub mod http;
+pub mod study;
+pub mod util;
 
 pub mod server {
     use std::collections::HashMap;
@@ -70,7 +72,7 @@ pub mod server {
                 let stream = stream.expect("failed!");
                 let routers = &self.routers;
                 let handle = std::thread::spawn(move || {
-                    handle_client(stream, &routers).unwrap_or_else(|error| eprintln!("{:?}", error));
+                    // handle_client(stream, &routers).unwrap_or_else(|error| eprintln!("{:?}", error));
                 });
 
                 thread_vec.push(handle);
@@ -102,7 +104,7 @@ pub mod server {
             self.port = port;
         }
         pub fn add_router(&mut self, path: &str, handler: &dyn Handler) {
-            self.routers.insert(path.to_string(), Box::new(handler));
+            // self.routers.insert(path.to_string(), Box::new(handler));
         }
     }
 }
