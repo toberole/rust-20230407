@@ -12,7 +12,7 @@ pub struct Response {
     pub(crate) protocol: String,
     pub(crate) code: u32,
     pub(crate) codeDesc: String,
-    pub(crate) head: HashMap<String, String>,
+    pub head: HashMap<String, String>,
     pub(crate) content: String,
 }
 
@@ -57,7 +57,7 @@ impl Response {
         res.push_str("\n");
 
         if !self.head.contains_key("Content-Length") {
-            self.head.insert("Content-Length".to_string(), content.len().to_string());
+            self.head.insert("Content-Length".to_string(), self.content.len().to_string());
         }
 
         for (k, v) in self.head.iter() {

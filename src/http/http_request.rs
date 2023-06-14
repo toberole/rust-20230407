@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::net::TcpStream;
 
 #[derive(Debug)]
 pub struct Request {
@@ -7,6 +8,7 @@ pub struct Request {
     path: String,
     head: HashMap<String, String>,
     content: String,
+    stream: Option<TcpStream>,
 }
 
 impl Request {
@@ -17,6 +19,7 @@ impl Request {
             path: "".to_string(),
             head: Default::default(),
             content: "".to_string(),
+            stream: None,
         };
         let content = String::from_utf8_lossy(bytes);
         let lines: Vec<&str> = content.split("\n").collect();
@@ -50,5 +53,41 @@ impl Request {
             }
         }
         return req;
+    }
+    pub fn set_method(&mut self, method: String) {
+        self.method = method;
+    }
+    pub fn set_protocol(&mut self, protocol: String) {
+        self.protocol = protocol;
+    }
+    pub fn set_path(&mut self, path: String) {
+        self.path = path;
+    }
+    pub fn set_head(&mut self, head: HashMap<String, String>) {
+        self.head = head;
+    }
+    pub fn set_content(&mut self, content: String) {
+        self.content = content;
+    }
+    pub fn set_stream(&mut self, stream: Option<TcpStream>) {
+        self.stream = stream;
+    }
+    pub fn method(&self) -> &str {
+        &self.method
+    }
+    pub fn protocol(&self) -> &str {
+        &self.protocol
+    }
+    pub fn path(&self) -> &str {
+        &self.path
+    }
+    pub fn head(&self) -> &HashMap<String, String> {
+        &self.head
+    }
+    pub fn content(&self) -> &str {
+        &self.content
+    }
+    pub fn stream(&self) -> &Option<TcpStream> {
+        &self.stream
     }
 }

@@ -1,10 +1,33 @@
-use rust_20230407::server::start;
+use rust_20230407::server::{Handler, ServerEngine};
+
+struct TestHandler;
+
+impl Handler for TestHandler {
+    fn service(&self, rq: rust_20230407::http::http_request::Request, mut response: rust_20230407::http::http_response::Response) {
+        println!("TestHandler service ......");
+
+        response.set_code(200);
+        response.set_codeDesc("OK".to_string());
+        response.head.insert("Content-Type".to_string(),
+                             "text/html; charset=utf-8".to_string());
+        let content = "Hello World!";
+        response.set_content(content.to_string());
+        response.head.insert("Content-Length".to_string(), content.len().to_string());
+        println!("res: {:?}", response);
+        let resStr = response.dump();
+        stream.write(resStr.as_bytes()).expect("write error!");
+    }
+}
 
 fn main() {
     println!("Hello World!");
     let ip = "127.0.0.1".to_string();
-    let port:u32 = 8080;
-    start(&ip, port);
+    let port: u32 = 8080;
+    let mut serverEngine = ServerEngine::new(ip, port);
+    let path = "/";
+    let handler = TestHandler;
+    serverEngine.add_router(path, &handler);
+    serverEngine.start().expect("start engine error!");
 }
 
 // use std::net::{TcpListener, TcpStream};

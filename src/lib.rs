@@ -1,12 +1,21 @@
-mod http;
+pub mod http;
 
 pub mod server {
+    use std::collections::HashMap;
     use std::io::{Read, Write};
     use std::net::{TcpListener, TcpStream};
+    pub use crate::http::http_handler::Handler;
     use crate::http::http_request::Request;
     use crate::http::http_response::Response;
 
-    fn handle_client(mut stream: TcpStream) -> std::io::Result<()> {
+    // #[derive(Debug)]
+    pub struct ServerEngine {
+        pub ip: String,
+        pub port: u32,
+        pub routers: HashMap<String, Box<dyn Handler>>,
+    }
+
+    fn handle_client(mut stream: TcpStream, routers: &HashMap<String, Box<dyn Handler>>) -> std::io::Result<()> {
         let mut buf = [0; 1024];
         let bytes_read = stream.read(&mut buf)?;
         if bytes_read == 0 {
@@ -14,8 +23,9 @@ pub mod server {
         }
 
         println!("{}", String::from_utf8_lossy(&buf[..bytes_read]));
-        let req = Request::new(&buf[..bytes_read]);
+        let mut req = Request::new(&buf[..bytes_read]);
         println!("req: {:?}", req);
+        req.set_stream(Some(stream));
 
         let mut response = Response {
             protocol: "".to_string(),
@@ -24,49 +34,75 @@ pub mod server {
             head: Default::default(),
             content: "".to_string(),
         };
-        response.set_code(200);
-        response.set_codeDesc("OK".to_string());
-        response.head.insert("Content-Type".to_string(),
-                             "text/html; charset=utf-8".to_string());
-        let content = "Hello World!";
-        response.set_content(content.to_string());
-        response.head.insert("Content-Length".to_string(), content.len().to_string());
-        println!("res: {:?}", response);
-        let resStr = response.dump();
-        stream.write(resStr.as_bytes()).expect("write error!");
-        return Ok(());
-    }
 
-    pub fn start(ip: &str, port: u32) -> Result<(), String> {
-        println!("start server ip: {:?},port: {}", ip, port);
-
-        let s = format!("{}:{}", ip, port);
-        println!("ip&&port: {}", s.clone());
-
-        let listener = match TcpListener::bind(s) {
-            Ok(l) => l,
-            Err(e) => panic!("{:?}", e),
-        };
-
-        let mut thread_vec: Vec<std::thread::JoinHandle<()>> = Vec::new();
-
-        for stream in listener.incoming() {
-            let stream = stream.expect("failed!");
-            let handle = std::thread::spawn(move || {
-                handle_client(stream).unwrap_or_else(|error| eprintln!("{:?}", error));
-            });
-
-            thread_vec.push(handle);
-        }
-
-        for handle in thread_vec {
-            handle.join().unwrap();
+        if routers.contains_key(req.path()) {
+            let handler = &routers.get(req.path());
+            match handler {
+                Some(h) => {
+                    h.service(req, response)
+                }
+                None => {
+                    println!("not found router!");
+                    return Ok(());
+                }
+            }
         }
         return Ok(());
     }
 
-    pub fn stop() -> Result<(), String> {
-        println!("stop server");
-        return Ok(());
+    unsafe impl Send for ServerEngine {}
+
+    impl ServerEngine {
+        pub fn start(&self) -> Result<(), String> {
+            println!("start server ip: {:?},port: {}", self.ip, self.port);
+
+            let s = format!("{}:{}", self.ip, self.port);
+            println!("ip&&port: {}", s.clone());
+
+            let listener = match TcpListener::bind(s) {
+                Ok(l) => l,
+                Err(e) => panic!("{:?}", e),
+            };
+
+            let mut thread_vec: Vec<std::thread::JoinHandle<()>> = Vec::new();
+
+            for stream in listener.incoming() {
+                let stream = stream.expect("failed!");
+                let routers = &self.routers;
+                let handle = std::thread::spawn(move || {
+                    handle_client(stream, &routers).unwrap_or_else(|error| eprintln!("{:?}", error));
+                });
+
+                thread_vec.push(handle);
+            }
+
+            for handle in thread_vec {
+                handle.join().unwrap();
+            }
+            return Ok(());
+        }
+
+        pub fn stop() -> Result<(), String> {
+            println!("stop server");
+            return Ok(());
+        }
+
+        pub fn new(ip: String, port: u32) -> ServerEngine {
+            let engine = ServerEngine {
+                ip,
+                port,
+                routers: Default::default(),
+            };
+            return engine;
+        }
+        pub fn set_ip(&mut self, ip: String) {
+            self.ip = ip;
+        }
+        pub fn set_port(&mut self, port: u32) {
+            self.port = port;
+        }
+        pub fn add_router(&mut self, path: &str, handler: &dyn Handler) {
+            self.routers.insert(path.to_string(), Box::new(handler));
+        }
     }
 }
