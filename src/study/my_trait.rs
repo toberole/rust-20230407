@@ -1,4 +1,3 @@
-use std::os::unix::raw::time_t;
 
 trait MyTrait {
     fn hello(&self);
