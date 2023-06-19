@@ -3,12 +3,12 @@ pub mod study;
 pub mod util;
 
 pub mod server {
-    use std::collections::HashMap;
-    use std::io::{Read, Write};
-    use std::net::{TcpListener, TcpStream};
     pub use crate::http::http_handler::Handler;
     use crate::http::http_request::Request;
     use crate::http::http_response::Response;
+    use std::collections::HashMap;
+    use std::io::{Read, Write};
+    use std::net::{TcpListener, TcpStream};
 
     // #[derive(Debug)]
     pub struct ServerEngine {
@@ -17,7 +17,10 @@ pub mod server {
         pub routers: HashMap<String, Box<dyn Handler>>,
     }
 
-    fn handle_client(mut stream: TcpStream, routers: &HashMap<String, Box<dyn Handler>>) -> std::io::Result<()> {
+    fn handle_client(
+        mut stream: TcpStream,
+        routers: &HashMap<String, Box<dyn Handler>>,
+    ) -> std::io::Result<()> {
         let mut buf = [0; 1024];
         let bytes_read = stream.read(&mut buf)?;
         if bytes_read == 0 {
@@ -40,9 +43,7 @@ pub mod server {
         if routers.contains_key(req.path()) {
             let handler = &routers.get(req.path());
             match handler {
-                Some(h) => {
-                    h.service(req, response)
-                }
+                Some(h) => h.service(req, response),
                 None => {
                     println!("not found router!");
                     return Ok(());
