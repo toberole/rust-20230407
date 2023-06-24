@@ -8,3 +8,6 @@ pub mod my_trait;
 pub mod my_copy_clone;
 pub mod my_lifetime_mark;
 pub mod my_drop;
+pub mod my_list;
+pub mod my_std_borrow;
+pub mod my_slice;

@@ -11,6 +11,7 @@ use rust_20230407::study::my_dyn_trait::dyn_trait1;
 use rust_20230407::study::my_error::my_error1;
 use rust_20230407::study::my_lifetime_mark::my_lifetime_mark_1;
 use rust_20230407::study::my_map::my_map1;
+use rust_20230407::study::my_slice::my_slice1;
 use rust_20230407::study::my_trait::my_trait1;
 
 fn main() {
@@ -22,5 +23,6 @@ fn main() {
     // my_trait1();
     // my_lifetime_mark_1();
     // my_drop1();
-    test_cpoy_clone();
+    // test_cpoy_clone();
+    my_slice1();
 }
