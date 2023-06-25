@@ -8,10 +8,12 @@ use rust_20230407::study::demo1::demo1_1;
 use rust_20230407::study::my_copy_clone::test_cpoy_clone;
 use rust_20230407::study::my_drop::my_drop1;
 use rust_20230407::study::my_dyn_trait::dyn_trait1;
+use rust_20230407::study::my_enum::my_enum1;
 use rust_20230407::study::my_error::my_error1;
 use rust_20230407::study::my_lifetime_mark::my_lifetime_mark_1;
 use rust_20230407::study::my_map::my_map1;
 use rust_20230407::study::my_slice::my_slice1;
+use rust_20230407::study::my_smart_pointer::{my_smart_pointer1, my_smart_pointer2};
 use rust_20230407::study::my_trait::my_trait1;
 
 fn main() {
@@ -24,5 +26,7 @@ fn main() {
     // my_lifetime_mark_1();
     // my_drop1();
     // test_cpoy_clone();
-    my_slice1();
+    // my_slice1();
+    // my_enum1();
+    my_smart_pointer2();
 }

@@ -4,7 +4,8 @@
 
 use std::fmt::{Display, Formatter};
 use std::{io, num};
-use std::io::Error;
+use std::fs::File;
+use std::io::{Error, Read};
 use std::num::ParseIntError;
 
 #[derive(Debug)]
@@ -53,6 +54,33 @@ pub fn my_error1() {
         }
         Ok(()) => {
             println!("ok");
+        }
+    }
+}
+
+fn read_text_from_file(path: &str) -> Result<String, io::Error> {
+    let mut f = File::open(path)?;
+    let mut s = String::new();
+    f.read_to_string(&mut s)?;
+    Ok(s)
+}
+
+fn my_error2() {
+    /*
+    类 Java的try ... catch
+    */
+    let str_file = read_text_from_file("hello.txt");
+    match str_file {
+        Ok(s) => println!("{}", s),
+        Err(e) => {
+            match e.kind() {
+                io::ErrorKind::NotFound => {
+                    println!("No such file");
+                }
+                _ => {
+                    println!("Cannot read the file");
+                }
+            }
         }
     }
 }

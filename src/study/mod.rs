@@ -11,3 +11,5 @@ pub mod my_drop;
 pub mod my_list;
 pub mod my_std_borrow;
 pub mod my_slice;
+pub mod my_enum;
+pub mod my_smart_pointer;
