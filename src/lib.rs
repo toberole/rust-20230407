@@ -1,6 +1,7 @@
 pub mod http;
 pub mod study;
 pub mod util;
+pub mod wasm;
 
 pub mod server {
     pub use crate::http::http_handler::Handler;
@@ -14,13 +15,12 @@ pub mod server {
     pub struct ServerEngine {
         pub ip: String,
         pub port: u32,
-        pub routers: HashMap<String, Box<dyn Handler>>,
+        pub routers: HashMap<String, Box<dyn Handler + Sync>>,
     }
 
-    fn handle_client(
-        mut stream: TcpStream,
-        routers: &HashMap<String, Box<dyn Handler>>,
-    ) -> std::io::Result<()> {
+    fn handle_client(mut stream: TcpStream,
+                     routers: &HashMap<String, Box<dyn Handler + Sync>>)
+                     -> std::io::Result<()> {
         let mut buf = [0; 1024];
         let bytes_read = stream.read(&mut buf)?;
         if bytes_read == 0 {
@@ -56,7 +56,7 @@ pub mod server {
     unsafe impl Send for ServerEngine {}
 
     impl ServerEngine {
-        pub fn start(&self) -> Result<(), String> {
+        pub fn start(&'static self) -> Result<(), String> {
             println!("start server ip: {:?},port: {}", self.ip, self.port);
 
             let s = format!("{}:{}", self.ip, self.port);
@@ -71,9 +71,8 @@ pub mod server {
 
             for stream in listener.incoming() {
                 let stream = stream.expect("failed!");
-                let routers = &self.routers;
-                let handle = std::thread::spawn(move || {
-                    // handle_client(stream, &routers).unwrap_or_else(|error| eprintln!("{:?}", error));
+                let handle = std::thread::spawn(|| {
+                    handle_client(stream, &self.routers).unwrap_or_else(|error| eprintln!("{:?}", error));
                 });
 
                 thread_vec.push(handle);

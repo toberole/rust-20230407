@@ -13,3 +13,5 @@ pub mod my_std_borrow;
 pub mod my_slice;
 pub mod my_enum;
 pub mod my_smart_pointer;
+pub mod my_thread;
+pub mod my_lambda;
